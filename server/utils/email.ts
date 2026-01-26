@@ -1,8 +1,8 @@
 import type { Reminder } from '~/server/db/schema'
 
 interface EmailPayload {
-  to: string
-  from: string
+  to: Array<{ email: string; name?: string }>
+  from?: { email: string; name?: string }
   subject: string
   html: string
 }
@@ -65,8 +65,8 @@ export async function sendReminderEmail(reminder: Reminder) {
   `
 
   const payload: EmailPayload = {
-    to: config.emailTo,
-    from: config.emailFrom,
+    to: [{ email: config.emailTo }],
+    from: { email: 'prob@tnorthern.com', name: 'Prob' },
     subject: `🔔 Reminder: ${reminder.eventName}`,
     html: emailHtml
   }

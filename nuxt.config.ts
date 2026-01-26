@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL,
     emailGatewayApiKey: process.env.EMAIL_GATEWAY_API_KEY,
-    emailGatewayApiUrl: process.env.EMAIL_GATEWAY_API_URL || 'https://email-gateway-production.up.railway.app/api/v1/emails',
+    emailGatewayApiUrl: process.env.EMAIL_GATEWAY_API_URL || 'https://email-gateway-production.up.railway.app/api/v1/send',
     emailFrom: process.env.EMAIL_FROM || 'Prob <prob@tnorthern.com>',
     emailTo: process.env.EMAIL_TO || 'traynorthern96@gmail.com',
     sessionSecret: process.env.SESSION_SECRET,
