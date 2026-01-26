@@ -90,7 +90,7 @@ async function handleAcknowledge(id: string) {
         <div class="hidden lg:block">
           <ReminderTable
             :reminders="reminders"
-            @edit="handleEdit"
+            @edit="openEditModal"
             @delete="handleDelete"
             @acknowledge="handleAcknowledge"
           />
@@ -102,12 +102,19 @@ async function handleAcknowledge(id: string) {
             v-for="reminder in reminders"
             :key="reminder.id"
             :reminder="reminder"
-            @edit="handleEdit"
+            @edit="openEditModal"
             @delete="handleDelete"
             @acknowledge="handleAcknowledge"
           />
         </div>
       </div>
     </main>
+
+    <ReminderFormModal
+      :is-open="isModalOpen"
+      :reminder="editingReminder"
+      @close="closeModal"
+      @success="handleSuccess"
+    />
   </div>
 </template>
