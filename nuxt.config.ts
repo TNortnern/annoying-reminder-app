@@ -18,6 +18,9 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       tasks: true
+    },
+    scheduledTasks: {
+      '*/30 * * * *': ['reminder-cron']
     }
   }
 })
