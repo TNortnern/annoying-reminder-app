@@ -9,7 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx server/db/migrate.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "drizzle-orm": "^0.45.1",
     "nuxt": "^3.15.1",
     "postgres": "^3.4.8",
+    "tsx": "^4.19.2",
     "vue": "latest",
     "zod": "^3.25.76"
   },
