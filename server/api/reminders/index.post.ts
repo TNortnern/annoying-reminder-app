@@ -4,6 +4,7 @@ import { prisma } from '~/server/db/prisma'
 const createReminderSchema = z.object({
   eventName: z.string().min(1).max(255),
   eventDateTime: z.string().datetime(),
+  emailRecipients: z.array(z.string().email()).min(1, 'At least one email recipient is required'),
   hoursBeforeStart: z.number().int().min(0).default(6),
   emailIntervalHours: z.number().int().min(1).default(1)
 })
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
       data: {
         eventName: data.eventName,
         eventDateTime: new Date(data.eventDateTime),
+        emailRecipients: data.emailRecipients,
         hoursBeforeStart: data.hoursBeforeStart,
         emailIntervalHours: data.emailIntervalHours,
         acknowledgeToken: generateAcknowledgeToken(),

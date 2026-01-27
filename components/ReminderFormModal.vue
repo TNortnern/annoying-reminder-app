@@ -17,6 +17,7 @@ const isEdit = computed(() => !!props.reminder)
 const form = reactive({
   eventName: '',
   eventDateTime: '',
+  emailRecipients: '',
   hoursBeforeStart: 6,
   emailIntervalHours: 1
 })
@@ -29,6 +30,7 @@ watch(() => props.reminder, (reminder) => {
   if (reminder) {
     form.eventName = reminder.eventName
     form.eventDateTime = new Date(reminder.eventDateTime).toISOString().slice(0, 16)
+    form.emailRecipients = reminder.emailRecipients?.join(', ') || ''
     form.hoursBeforeStart = reminder.hoursBeforeStart
     form.emailIntervalHours = reminder.emailIntervalHours
   }
@@ -39,6 +41,7 @@ watch(() => props.isOpen, (isOpen) => {
   if (!isOpen && !props.reminder) {
     form.eventName = ''
     form.eventDateTime = ''
+    form.emailRecipients = ''
     form.hoursBeforeStart = 6
     form.emailIntervalHours = 1
     error.value = ''
@@ -66,9 +69,22 @@ async function handleSubmit() {
       return
     }
 
+    // Parse email recipients from comma-separated string
+    const emailRecipients = form.emailRecipients
+      .split(',')
+      .map(email => email.trim())
+      .filter(email => email.length > 0)
+
+    if (emailRecipients.length === 0) {
+      error.value = 'At least one email recipient is required'
+      loading.value = false
+      return
+    }
+
     const body = {
       eventName: form.eventName,
       eventDateTime: eventDate.toISOString(),
+      emailRecipients,
       hoursBeforeStart: form.hoursBeforeStart,
       emailIntervalHours: form.emailIntervalHours
     }
@@ -118,6 +134,20 @@ async function handleSubmit() {
           <UInput
             v-model="form.eventDateTime"
             type="datetime-local"
+            size="lg"
+            :disabled="loading"
+          />
+        </UFormGroup>
+
+        <UFormGroup
+          label="Email Recipients"
+          name="emailRecipients"
+          help="Comma-separated email addresses (e.g., john@example.com, jane@example.com)"
+          required
+        >
+          <UInput
+            v-model="form.emailRecipients"
+            placeholder="your@email.com, another@email.com"
             size="lg"
             :disabled="loading"
           />

@@ -30,6 +30,7 @@ model Reminder {
   id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   eventName           String          @map("event_name") @db.VarChar(255)
   eventDateTime       DateTime        @map("event_date_time") @db.Timestamptz
+  emailRecipients     String[]        @map("email_recipients")
   hoursBeforeStart    Int             @default(6) @map("hours_before_start")
   emailIntervalHours  Int             @default(1) @map("email_interval_hours")
   status              ReminderStatus  @default(pending)
