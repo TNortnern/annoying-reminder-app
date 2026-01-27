@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', 'nuxt-auth-utils'],
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL,
     emailGatewayApiKey: process.env.EMAIL_GATEWAY_API_KEY,
@@ -11,6 +11,9 @@ export default defineNuxtConfig({
     sessionSecret: process.env.SESSION_SECRET,
     adminEmail: process.env.ADMIN_EMAIL || 'admin@admin.admin',
     adminPassword: process.env.ADMIN_PASSWORD || 'Admin1234!',
+    session: {
+      password: process.env.SESSION_SECRET || process.env.NUXT_SESSION_PASSWORD
+    },
     public: {
       appUrl: process.env.APP_URL || 'http://localhost:3000'
     }

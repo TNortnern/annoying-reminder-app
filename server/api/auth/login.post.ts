@@ -34,8 +34,14 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Set session
-    await setUserSession(event, user)
+    // Set session using nuxt-auth-utils
+    await setUserSession(event, {
+      user: {
+        userId: user.id,
+        email: user.email
+      },
+      loggedInAt: Date.now()
+    })
 
     return {
       success: true,
