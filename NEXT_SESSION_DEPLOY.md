@@ -89,7 +89,7 @@ This will trigger an automatic redeployment.
 
 ## Expected Behavior
 
-- **Cron Schedule:** Every 30 minutes (`*/30 * * * *`)
+- **Cron Schedule:** Every 10 minutes (`*/10 * * * *`)
 - **Email Send:** Reminders send emails starting 6 hours before the event (or custom hours)
 - **Email Frequency:** Every 1 hour (or custom interval) until acknowledged
 - **Admin Seeding:** Auto-creates admin user on first production deployment
