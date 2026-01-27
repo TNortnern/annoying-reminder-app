@@ -1,6 +1,5 @@
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
-import { eq, and, or, isNull, lte, sql } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
+import { Prisma } from '@prisma/client'
 
 export default defineTask({
   meta: {
@@ -13,48 +12,60 @@ export default defineTask({
 
     try {
       // Step 1: Activate pending reminders whose start time has arrived
-      const toActivate = await db
-        .select()
-        .from(reminders)
-        .where(
-          and(
-            eq(reminders.status, 'pending'),
-            lte(
-              sql`${reminders.eventDateTime} - (${reminders.hoursBeforeStart} * interval '1 hour')`,
-              now
-            )
-          )
-        )
+      // Find reminders where: eventDateTime - (hoursBeforeStart * 1 hour) <= now
+      const toActivate = await prisma.$queryRaw<Array<{
+        id: string
+        eventName: string
+        eventDateTime: Date
+        hoursBeforeStart: number
+        emailIntervalHours: number
+        status: string
+        acknowledgeToken: string
+        lastEmailSentAt: Date | null
+        acknowledgedAt: Date | null
+        createdAt: Date
+        updatedAt: Date
+      }>>`
+        SELECT * FROM reminders
+        WHERE status = 'pending'
+        AND event_date_time - (hours_before_start * interval '1 hour') <= ${now}
+      `
 
       if (toActivate.length > 0) {
         console.log(`[Cron] Activating ${toActivate.length} reminder(s)`)
 
         for (const reminder of toActivate) {
-          await db
-            .update(reminders)
-            .set({ status: 'active' })
-            .where(eq(reminders.id, reminder.id))
+          await prisma.reminder.update({
+            where: { id: reminder.id },
+            data: { status: 'active' }
+          })
 
           console.log(`  ✓ Activated: ${reminder.eventName}`)
         }
       }
 
       // Step 2: Find active reminders that need emails
-      const toEmail = await db
-        .select()
-        .from(reminders)
-        .where(
-          and(
-            eq(reminders.status, 'active'),
-            or(
-              isNull(reminders.lastEmailSentAt),
-              lte(
-                sql`${reminders.lastEmailSentAt} + (${reminders.emailIntervalHours} * interval '1 hour')`,
-                now
-              )
-            )
-          )
+      // Find reminders where: status = 'active' AND (lastEmailSentAt IS NULL OR lastEmailSentAt + emailIntervalHours <= now)
+      const toEmail = await prisma.$queryRaw<Array<{
+        id: string
+        eventName: string
+        eventDateTime: Date
+        hoursBeforeStart: number
+        emailIntervalHours: number
+        status: string
+        acknowledgeToken: string
+        lastEmailSentAt: Date | null
+        acknowledgedAt: Date | null
+        createdAt: Date
+        updatedAt: Date
+      }>>`
+        SELECT * FROM reminders
+        WHERE status = 'active'
+        AND (
+          last_email_sent_at IS NULL
+          OR last_email_sent_at + (email_interval_hours * interval '1 hour') <= ${now}
         )
+      `
 
       if (toEmail.length > 0) {
         console.log(`[Cron] Sending ${toEmail.length} reminder email(s)`)
@@ -63,10 +74,10 @@ export default defineTask({
           try {
             await sendReminderEmail(reminder)
 
-            await db
-              .update(reminders)
-              .set({ lastEmailSentAt: now })
-              .where(eq(reminders.id, reminder.id))
+            await prisma.reminder.update({
+              where: { id: reminder.id },
+              data: { lastEmailSentAt: now }
+            })
 
             console.log(`  ✓ Sent: ${reminder.eventName}`)
           } catch (error) {
