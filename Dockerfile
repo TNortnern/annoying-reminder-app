@@ -4,8 +4,9 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
+# Copy package files and Prisma schema (needed for postinstall)
 COPY package*.json ./
+COPY prisma ./prisma
 
 # Install dependencies
 RUN npm ci
@@ -14,8 +15,9 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 
-# Copy dependencies
+# Copy dependencies and Prisma client
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/.prisma ./.prisma
 
 # Copy source code
 COPY . .
@@ -32,6 +34,7 @@ COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.prisma ./.prisma
 
 # Expose port
 EXPOSE 3000
