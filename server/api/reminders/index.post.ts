@@ -1,6 +1,5 @@
 import { z } from 'zod'
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
+import { prisma } from '~/server/db/prisma'
 
 const createReminderSchema = z.object({
   eventName: z.string().min(1).max(255),
@@ -16,17 +15,16 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const data = createReminderSchema.parse(body)
 
-    const [reminder] = await db
-      .insert(reminders)
-      .values({
+    const reminder = await prisma.reminder.create({
+      data: {
         eventName: data.eventName,
         eventDateTime: new Date(data.eventDateTime),
         hoursBeforeStart: data.hoursBeforeStart,
         emailIntervalHours: data.emailIntervalHours,
         acknowledgeToken: generateAcknowledgeToken(),
         status: 'pending'
-      })
-      .returning()
+      }
+    })
 
     return {
       reminder

@@ -1,10 +1,10 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import postgres from 'postgres'
-import { resolve } from 'path'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+
+const execAsync = promisify(exec)
 
 export default defineNitroPlugin(async (nitroApp) => {
-  console.log('=== MIGRATION PLUGIN STARTING ===')
+  console.log('=== PRISMA MIGRATION PLUGIN STARTING ===')
 
   const connectionString = process.env.DATABASE_URL
 
@@ -16,26 +16,18 @@ export default defineNitroPlugin(async (nitroApp) => {
   console.log('Connection string configured:', connectionString.replace(/:[^:@]+@/, ':****@'))
 
   try {
-    // Create migration client
-    const migrationClient = postgres(connectionString, { max: 1 })
-    const db = drizzle(migrationClient)
+    console.log('Running Prisma migrations...')
+    const { stdout, stderr } = await execAsync('npx prisma migrate deploy')
 
-    const migrationsFolder = resolve(process.cwd(), './server/db/migrations')
-    console.log('Migrations folder:', migrationsFolder)
-    console.log('Current working directory:', process.cwd())
+    if (stdout) console.log(stdout)
+    if (stderr) console.error(stderr)
 
-    // List files in migrations folder
-    console.log('Checking migrations folder...')
-
-    console.log('Running migrations...')
-    await migrate(db, { migrationsFolder })
-
-    console.log('✓ Migrations completed successfully')
-
-    await migrationClient.end()
-    console.log('=== MIGRATION PLUGIN COMPLETE ===')
-  } catch (err) {
-    console.error('✗ Migration failed:', err)
+    console.log('✓ Prisma migrations completed successfully')
+    console.log('=== PRISMA MIGRATION PLUGIN COMPLETE ===')
+  } catch (err: any) {
+    console.error('✗ Prisma migration failed:', err.message)
+    if (err.stdout) console.error('stdout:', err.stdout)
+    if (err.stderr) console.error('stderr:', err.stderr)
     throw err
   }
 })

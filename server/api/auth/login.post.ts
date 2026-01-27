@@ -1,8 +1,6 @@
 import { z } from 'zod'
 import bcrypt from 'bcrypt'
-import { db } from '~/server/db'
-import { users } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -15,11 +13,9 @@ export default defineEventHandler(async (event) => {
     const { email, password } = loginSchema.parse(body)
 
     // Find user by email
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1)
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
 
     if (!user) {
       throw createError({

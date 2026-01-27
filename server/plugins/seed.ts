@@ -1,6 +1,4 @@
-import { db } from '../db'
-import { users } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { prisma } from '../db/prisma'
 import bcrypt from 'bcrypt'
 
 export default defineNitroPlugin(async () => {
@@ -12,19 +10,19 @@ export default defineNitroPlugin(async () => {
       const adminPassword = config.adminPassword
 
       // Check if admin user exists
-      const [existingUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, adminEmail))
-        .limit(1)
+      const existingUser = await prisma.user.findUnique({
+        where: { email: adminEmail }
+      })
 
       if (!existingUser) {
         // Hash password and create admin user
         const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
-        await db.insert(users).values({
-          email: adminEmail,
-          password: hashedPassword
+        await prisma.user.create({
+          data: {
+            email: adminEmail,
+            password: hashedPassword
+          }
         })
 
         console.log(`✓ Admin user created: ${adminEmail}`)

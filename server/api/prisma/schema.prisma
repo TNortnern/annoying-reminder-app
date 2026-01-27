@@ -1,0 +1,43 @@
+// Prisma Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("users")
+}
+
+enum ReminderStatus {
+  pending
+  active
+  acknowledged
+
+  @@map("status")
+}
+
+model Reminder {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventName           String          @map("event_name") @db.VarChar(255)
+  eventDateTime       DateTime        @map("event_date_time") @db.Timestamptz
+  hoursBeforeStart    Int             @default(6) @map("hours_before_start")
+  emailIntervalHours  Int             @default(1) @map("email_interval_hours")
+  status              ReminderStatus  @default(pending)
+  acknowledgeToken    String          @unique @map("acknowledge_token") @db.VarChar(64)
+  lastEmailSentAt     DateTime?       @map("last_email_sent_at") @db.Timestamptz
+  acknowledgedAt      DateTime?       @map("acknowledged_at") @db.Timestamptz
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("reminders")
+}

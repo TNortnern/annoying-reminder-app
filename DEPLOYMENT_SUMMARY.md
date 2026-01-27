@@ -33,7 +33,7 @@ Copy these variables to Railway (from `.env.railway` file):
 
 ```
 EMAIL_GATEWAY_API_KEY=egw_live_lMJ2Z_ncCTetk-UV4n7ruIht4AcSwoKp
-EMAIL_GATEWAY_API_URL=https://email-gateway-production.up.railway.app/api/v1/emails
+EMAIL_GATEWAY_API_URL=https://email-gateway-production.up.railway.app/api/v1/send
 EMAIL_FROM=Prob <prob@tnorthern.com>
 EMAIL_TO=traynorthern96@gmail.com
 SESSION_SECRET=12044a8fa824f51f21ea969742c61e9b4edb96a53471fabbbba856d8bac6044a
@@ -111,10 +111,35 @@ After deployment, monitor:
 - **Environment Example:** `/Users/tnorthern/Documents/projects/pers/annoying-reminder-app/.env.example`
 - **Railway Variables:** `/Users/tnorthern/Documents/projects/pers/annoying-reminder-app/.env.railway`
 
-## Next Steps
+## Current Deployment Status (2026-01-26)
 
-1. Complete Railway deployment using the steps above
-2. Test the full flow end-to-end
-3. (Optional) Add custom domain in Railway settings
-4. (Optional) Set up monitoring/alerting for cron jobs
-5. (Optional) Configure email notifications for deployment status
+### ✅ Completed
+- Railway project created: **Persistent Nudge** (project ID: `d1933ec7-00fb-435c-a2dc-c01052fd332f`)
+- PostgreSQL database added to project
+- All code committed and pushed to GitHub
+
+### ⏳ Remaining Steps
+1. **Add GitHub repository as service** to the Railway project
+   - Repository: `TNortnern/annoying-reminder-app`
+   - Railway will automatically detect Dockerfile and build
+2. **Configure environment variables** in Railway dashboard
+3. **Get deployment URL** from Railway
+4. **Update APP_URL** environment variable with the deployment URL
+5. **Test end-to-end flow** with a test reminder
+
+### Next Session Action Plan
+Use the **browser-use** skill to:
+1. Navigate to Railway dashboard (https://railway.com/project/d1933ec7-00fb-435c-a2dc-c01052fd332f)
+2. Add the GitHub repository `TNortnern/annoying-reminder-app` as a service
+3. Configure all required environment variables
+4. Wait for build and deployment to complete
+5. Generate Railway domain
+6. Update APP_URL with the generated domain
+7. Test by creating a reminder and verifying email delivery
+
+## Email Configuration (Verified Working)
+
+Email integration has been tested locally and confirmed working:
+- **API Endpoint:** `https://email-gateway-production.up.railway.app/api/v1/send`
+- **Test Result:** Successfully sent to `traynorthern96@gmail.com`
+- **Message ID:** Returned with status "queued"

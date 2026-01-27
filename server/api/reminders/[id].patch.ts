@@ -1,7 +1,5 @@
 import { z } from 'zod'
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
 
 const updateReminderSchema = z.object({
   eventName: z.string().min(1).max(255).optional(),
@@ -35,18 +33,10 @@ export default defineEventHandler(async (event) => {
     if (data.emailIntervalHours !== undefined) updateData.emailIntervalHours = data.emailIntervalHours
     if (data.status) updateData.status = data.status
 
-    const [reminder] = await db
-      .update(reminders)
-      .set(updateData)
-      .where(eq(reminders.id, id))
-      .returning()
-
-    if (!reminder) {
-      throw createError({
-        statusCode: 404,
-        message: 'Reminder not found'
-      })
-    }
+    const reminder = await prisma.reminder.update({
+      where: { id },
+      data: updateData
+    })
 
     return {
       reminder

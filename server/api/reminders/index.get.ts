@@ -1,14 +1,11 @@
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
-import { desc } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
 
 export default defineEventHandler(async (event) => {
   await requireAuth(event)
 
-  const allReminders = await db
-    .select()
-    .from(reminders)
-    .orderBy(desc(reminders.eventDateTime))
+  const allReminders = await prisma.reminder.findMany({
+    orderBy: { eventDateTime: 'desc' }
+  })
 
   return {
     reminders: allReminders

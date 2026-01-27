@@ -1,6 +1,4 @@
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
 
 export default defineEventHandler(async (event) => {
   await requireAuth(event)
@@ -14,20 +12,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const [reminder] = await db
-    .delete(reminders)
-    .where(eq(reminders.id, id))
-    .returning()
+  try {
+    await prisma.reminder.delete({
+      where: { id }
+    })
 
-  if (!reminder) {
+    return {
+      success: true,
+      message: 'Reminder deleted'
+    }
+  } catch (error) {
     throw createError({
       statusCode: 404,
       message: 'Reminder not found'
     })
-  }
-
-  return {
-    success: true,
-    message: 'Reminder deleted'
   }
 })

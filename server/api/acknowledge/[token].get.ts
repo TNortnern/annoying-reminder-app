@@ -1,6 +1,4 @@
-import { db } from '~/server/db'
-import { reminders } from '~/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { prisma } from '~/server/db/prisma'
 
 export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token')
@@ -12,11 +10,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const [reminder] = await db
-    .select()
-    .from(reminders)
-    .where(eq(reminders.acknowledgeToken, token))
-    .limit(1)
+  const reminder = await prisma.reminder.findUnique({
+    where: { acknowledgeToken: token }
+  })
 
   if (!reminder) {
     throw createError({
@@ -35,14 +31,13 @@ export default defineEventHandler(async (event) => {
   }
 
   // Acknowledge the reminder
-  const [updated] = await db
-    .update(reminders)
-    .set({
+  const updated = await prisma.reminder.update({
+    where: { acknowledgeToken: token },
+    data: {
       status: 'acknowledged',
       acknowledgedAt: new Date()
-    })
-    .where(eq(reminders.acknowledgeToken, token))
-    .returning()
+    }
+  })
 
   return {
     success: true,
