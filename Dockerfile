@@ -43,4 +43,4 @@ ENV NITRO_HOST=0.0.0.0
 ENV NITRO_PORT=3000
 
 # Start application (run migrations first, seeding handled by Nitro plugin)
-CMD ["sh", "-c", "npm run db:migrate && node .output/server/index.mjs"]
+CMD ["sh", "-c", "echo '=== Starting migration ===' && ls -la server/db && npm run db:migrate && echo '=== Migration complete, starting server ===' && node .output/server/index.mjs"]
