@@ -31,7 +31,7 @@ WORKDIR /app
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/server/db/migrations ./server/db/migrations
+COPY --from=builder /app/server/db ./server/db
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Expose port
