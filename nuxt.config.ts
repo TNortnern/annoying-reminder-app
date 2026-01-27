@@ -23,7 +23,7 @@ export default defineNuxtConfig({
       tasks: true
     },
     scheduledTasks: {
-      '*/30 * * * *': ['reminder-cron']
+      '*/10 * * * *': ['reminder-cron']
     }
   }
 })
