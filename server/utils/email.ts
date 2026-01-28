@@ -104,6 +104,13 @@ export async function sendReminderEmail(reminder: Reminder) {
 
 export async function sendTestEmail(emailTo: string) {
   const config = useRuntimeConfig()
+  
+  // Debug logging
+  console.log('sendTestEmail - Runtime config:', {
+    apiUrl: config.emailGatewayApiUrl,
+    apiKeyExists: !!config.emailGatewayApiKey,
+    apiKeyLength: config.emailGatewayApiKey?.length || 0
+  })
 
   const testToken = `test-${Date.now()}`
   const acknowledgeUrl = `${config.public.appUrl}/acknowledge/${testToken}`
