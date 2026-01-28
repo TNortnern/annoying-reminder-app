@@ -20,10 +20,20 @@ interface Reminder {
   updatedAt: Date
 }
 
-export async function sendReminderEmail(reminder: Reminder) {
-  const config = useRuntimeConfig()
+// Get email config from environment at runtime
+function getEmailConfig() {
+  return {
+    apiUrl: process.env.EMAIL_GATEWAY_API_URL || 'https://email-gateway-production.up.railway.app/api/v1/send',
+    apiKey: process.env.EMAIL_GATEWAY_API_KEY || '',
+    from: process.env.EMAIL_FROM || 'Prob <prob@tnorthern.com>',
+    appUrl: process.env.APP_URL || 'http://localhost:3000'
+  }
+}
 
-  const acknowledgeUrl = `${config.public.appUrl}/acknowledge/${reminder.acknowledgeToken}`
+export async function sendReminderEmail(reminder: Reminder) {
+  const config = getEmailConfig()
+
+  const acknowledgeUrl = `${config.appUrl}/acknowledge/${reminder.acknowledgeToken}`
 
   const emailHtml = `
     <!DOCTYPE html>
@@ -85,10 +95,10 @@ export async function sendReminderEmail(reminder: Reminder) {
   }
 
   try {
-    const response = await $fetch(config.emailGatewayApiUrl, {
+    const response = await $fetch(config.apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.emailGatewayApiKey}`,
+        'Authorization': `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json'
       },
       body: payload
@@ -103,17 +113,10 @@ export async function sendReminderEmail(reminder: Reminder) {
 }
 
 export async function sendTestEmail(emailTo: string) {
-  const config = useRuntimeConfig()
-  
-  // Debug logging
-  console.log('sendTestEmail - Runtime config:', {
-    apiUrl: config.emailGatewayApiUrl,
-    apiKeyExists: !!config.emailGatewayApiKey,
-    apiKeyLength: config.emailGatewayApiKey?.length || 0
-  })
+  const config = getEmailConfig()
 
   const testToken = `test-${Date.now()}`
-  const acknowledgeUrl = `${config.public.appUrl}/acknowledge/${testToken}`
+  const acknowledgeUrl = `${config.appUrl}/acknowledge/${testToken}`
 
   const emailHtml = `
     <!DOCTYPE html>
@@ -179,10 +182,10 @@ export async function sendTestEmail(emailTo: string) {
   }
 
   try {
-    const response = await $fetch(config.emailGatewayApiUrl, {
+    const response = await $fetch(config.apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.emailGatewayApiKey}`,
+        'Authorization': `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json'
       },
       body: payload

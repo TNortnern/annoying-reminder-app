@@ -13,15 +13,6 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const emailTo = body.emailTo || 'traynorthern96@gmail.com'
 
-  // Debug: Log runtime config (mask sensitive values)
-  const config = useRuntimeConfig()
-  console.log('Debug - Email Config:', {
-    apiUrl: config.emailGatewayApiUrl,
-    apiKeyExists: !!config.emailGatewayApiKey,
-    apiKeyPrefix: config.emailGatewayApiKey ? config.emailGatewayApiKey.substring(0, 10) + '...' : 'undefined',
-    from: config.emailFrom
-  })
-
   try {
     const result = await sendTestEmail(emailTo)
     return { success: true, result }
