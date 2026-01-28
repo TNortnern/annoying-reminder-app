@@ -55,15 +55,25 @@ export default defineEventHandler(async (event) => {
     }
 
     // Step 2: Find active reminders that need emails
+    // Only get reminders that are active AND not acknowledged
     const activeReminders = await prisma.reminder.findMany({
-      where: { status: 'active' }
+      where: { 
+        status: 'active',
+        acknowledgedAt: null  // Extra safety: don't email acknowledged reminders
+      }
     })
 
     // Filter those that need emailing based on interval
     const toEmail = activeReminders.filter(r => {
-      if (!r.lastEmailSentAt) return true
+      if (!r.lastEmailSentAt) {
+        console.log(`  → ${r.eventName}: never emailed, will send now`)
+        return true
+      }
       const nextEmailTime = new Date(r.lastEmailSentAt.getTime() + r.emailIntervalMinutes * 60 * 1000)
-      return nextEmailTime <= now
+      const shouldEmail = nextEmailTime <= now
+      const minutesUntilNext = Math.round((nextEmailTime.getTime() - now.getTime()) / 60000)
+      console.log(`  → ${r.eventName}: last emailed ${Math.round((now.getTime() - r.lastEmailSentAt.getTime())/60000)}min ago, next due in ${minutesUntilNext}min, interval=${r.emailIntervalMinutes}min, willSend=${shouldEmail}`)
+      return shouldEmail
     })
 
     if (toEmail.length > 0) {

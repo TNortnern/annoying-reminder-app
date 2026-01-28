@@ -1,5 +1,5 @@
 import { prisma } from '~/server/db/prisma'
-import { Prisma } from '@prisma/client'
+import { sendReminderEmail } from '~/server/utils/email'
 
 export default defineTask({
   meta: {
@@ -12,60 +12,51 @@ export default defineTask({
 
     try {
       // Step 1: Activate pending reminders whose start time has arrived
-      // Find reminders where: eventDateTime - (hoursBeforeStart * 1 hour) <= now
-      const toActivate = await prisma.$queryRaw<Array<{
-        id: string
-        eventName: string
-        eventDateTime: Date
-        hoursBeforeStart: number
-        emailIntervalMinutes: number
-        status: string
-        acknowledgeToken: string
-        lastEmailSentAt: Date | null
-        acknowledgedAt: Date | null
-        createdAt: Date
-        updatedAt: Date
-      }>>`
-        SELECT * FROM reminders
-        WHERE status = 'pending'
-        AND event_date_time - (hours_before_start * interval '1 hour') <= ${now}
-      `
+      const toActivate = await prisma.reminder.findMany({
+        where: {
+          status: 'pending'
+        }
+      })
 
-      if (toActivate.length > 0) {
-        console.log(`[Cron] Activating ${toActivate.length} reminder(s)`)
+      // Filter manually for hoursBeforeStart logic
+      const pendingToActivate = toActivate.filter(r => {
+        const activationTime = new Date(r.eventDateTime.getTime() - r.hoursBeforeStart * 60 * 60 * 1000)
+        return activationTime <= now
+      })
 
-        for (const reminder of toActivate) {
+      if (pendingToActivate.length > 0) {
+        console.log(`[Cron] Activating ${pendingToActivate.length} reminder(s)`)
+
+        for (const reminder of pendingToActivate) {
           await prisma.reminder.update({
             where: { id: reminder.id },
             data: { status: 'active' }
           })
-
           console.log(`  ✓ Activated: ${reminder.eventName}`)
         }
       }
 
       // Step 2: Find active reminders that need emails
-      // Find reminders where: status = 'active' AND (lastEmailSentAt IS NULL OR lastEmailSentAt + emailIntervalHours <= now)
-      const toEmail = await prisma.$queryRaw<Array<{
-        id: string
-        eventName: string
-        eventDateTime: Date
-        hoursBeforeStart: number
-        emailIntervalMinutes: number
-        status: string
-        acknowledgeToken: string
-        lastEmailSentAt: Date | null
-        acknowledgedAt: Date | null
-        createdAt: Date
-        updatedAt: Date
-      }>>`
-        SELECT * FROM reminders
-        WHERE status = 'active'
-        AND (
-          last_email_sent_at IS NULL
-          OR last_email_sent_at + (email_interval_minutes * interval '1 minute') <= ${now}
-        )
-      `
+      // Only get reminders that are active AND not acknowledged
+      const activeReminders = await prisma.reminder.findMany({
+        where: { 
+          status: 'active',
+          acknowledgedAt: null  // Don't email acknowledged reminders
+        }
+      })
+
+      // Filter those that need emailing based on interval
+      const toEmail = activeReminders.filter(r => {
+        if (!r.lastEmailSentAt) {
+          console.log(`  → ${r.eventName}: never emailed, will send now`)
+          return true
+        }
+        const nextEmailTime = new Date(r.lastEmailSentAt.getTime() + r.emailIntervalMinutes * 60 * 1000)
+        const shouldEmail = nextEmailTime <= now
+        const minutesUntilNext = Math.round((nextEmailTime.getTime() - now.getTime()) / 60000)
+        console.log(`  → ${r.eventName}: last emailed ${Math.round((now.getTime() - r.lastEmailSentAt.getTime())/60000)}min ago, next due in ${minutesUntilNext}min, interval=${r.emailIntervalMinutes}min, willSend=${shouldEmail}`)
+        return shouldEmail
+      })
 
       if (toEmail.length > 0) {
         console.log(`[Cron] Sending ${toEmail.length} reminder email(s)`)
