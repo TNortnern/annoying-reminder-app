@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
     // Filter those that need emailing based on interval
     const toEmail = activeReminders.filter(r => {
       if (!r.lastEmailSentAt) return true
-      const nextEmailTime = new Date(r.lastEmailSentAt.getTime() + r.emailIntervalHours * 60 * 60 * 1000)
+      const nextEmailTime = new Date(r.lastEmailSentAt.getTime() + r.emailIntervalMinutes * 60 * 1000)
       return nextEmailTime <= now
     })
 

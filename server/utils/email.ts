@@ -11,7 +11,7 @@ interface Reminder {
   eventDateTime: Date
   emailRecipients: string[]
   hoursBeforeStart: number
-  emailIntervalHours: number
+  emailIntervalMinutes: number
   status: string
   acknowledgeToken: string
   lastEmailSentAt: Date | null
@@ -31,6 +31,12 @@ function getEmailConfig() {
 }
 
 export async function sendReminderEmail(reminder: Reminder) {
+  // Validate reminder has email recipients
+  if (!reminder.emailRecipients || reminder.emailRecipients.length === 0) {
+    console.log(`  ⚠ Skipping reminder "${reminder.eventName}" - no email recipients`)
+    return { skipped: true, reason: 'No email recipients' }
+  }
+
   const config = getEmailConfig()
 
   const acknowledgeUrl = `${config.appUrl}/acknowledge/${reminder.acknowledgeToken}`
@@ -76,7 +82,7 @@ export async function sendReminderEmail(reminder: Reminder) {
         </div>
 
         <p style="font-size: 14px; color: #666; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-          You'll continue receiving this email every <strong>${reminder.emailIntervalHours} hour(s)</strong> until acknowledged.
+          You'll continue receiving this email every <strong>${reminder.emailIntervalMinutes} minute(s)</strong> until acknowledged.
         </p>
       </div>
 

@@ -18,7 +18,7 @@ export default defineTask({
         eventName: string
         eventDateTime: Date
         hoursBeforeStart: number
-        emailIntervalHours: number
+        emailIntervalMinutes: number
         status: string
         acknowledgeToken: string
         lastEmailSentAt: Date | null
@@ -51,7 +51,7 @@ export default defineTask({
         eventName: string
         eventDateTime: Date
         hoursBeforeStart: number
-        emailIntervalHours: number
+        emailIntervalMinutes: number
         status: string
         acknowledgeToken: string
         lastEmailSentAt: Date | null
@@ -63,7 +63,7 @@ export default defineTask({
         WHERE status = 'active'
         AND (
           last_email_sent_at IS NULL
-          OR last_email_sent_at + (email_interval_hours * interval '1 hour') <= ${now}
+          OR last_email_sent_at + (email_interval_minutes * interval '1 minute') <= ${now}
         )
       `
 

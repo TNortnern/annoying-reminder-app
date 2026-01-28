@@ -58,7 +58,7 @@ function statusColor(status: string) {
 
     <template #config-data="{ row }">
       <div class="text-sm text-gray-600 dark:text-gray-400">
-        <div>Every {{ row.emailIntervalHours }}h</div>
+        <div>Every {{ row.emailIntervalMinutes }}min</div>
         <div>{{ row.hoursBeforeStart }}h before</div>
       </div>
     </template>

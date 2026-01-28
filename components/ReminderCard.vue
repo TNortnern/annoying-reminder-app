@@ -51,7 +51,7 @@ const formattedDate = computed(() => {
       </div>
 
       <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-        <p>📧 Every {{ reminder.emailIntervalHours }}h</p>
+        <p>📧 Every {{ reminder.emailIntervalMinutes }}min</p>
         <p>⏰ Starts {{ reminder.hoursBeforeStart }}h before</p>
       </div>
 

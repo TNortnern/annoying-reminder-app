@@ -32,7 +32,7 @@ model Reminder {
   eventDateTime       DateTime        @map("event_date_time") @db.Timestamptz
   emailRecipients     String[]        @map("email_recipients")
   hoursBeforeStart    Int             @default(6) @map("hours_before_start")
-  emailIntervalHours  Int             @default(1) @map("email_interval_hours")
+  emailIntervalMinutes  Int             @default(10) @map("email_interval_minutes")
   status              ReminderStatus  @default(pending)
   acknowledgeToken    String          @unique @map("acknowledge_token") @db.VarChar(64)
   lastEmailSentAt     DateTime?       @map("last_email_sent_at") @db.Timestamptz

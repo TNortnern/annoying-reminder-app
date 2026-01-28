@@ -6,7 +6,7 @@ const createReminderSchema = z.object({
   eventDateTime: z.string().datetime(),
   emailRecipients: z.array(z.string().email()).min(1, 'At least one email recipient is required'),
   hoursBeforeStart: z.number().int().min(0).default(6),
-  emailIntervalHours: z.number().int().min(1).default(1)
+  emailIntervalMinutes: z.number().int().min(1).default(10)
 })
 
 export default defineEventHandler(async (event) => {
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         eventDateTime: new Date(data.eventDateTime),
         emailRecipients: data.emailRecipients,
         hoursBeforeStart: data.hoursBeforeStart,
-        emailIntervalHours: data.emailIntervalHours,
+        emailIntervalMinutes: data.emailIntervalMinutes,
         acknowledgeToken: generateAcknowledgeToken(),
         status: 'pending'
       }

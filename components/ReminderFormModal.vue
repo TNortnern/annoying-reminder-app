@@ -19,7 +19,7 @@ const form = reactive({
   eventDateTime: '',
   emailRecipients: '',
   hoursBeforeStart: 6,
-  emailIntervalHours: 1
+  emailIntervalMinutes: 10
 })
 
 const loading = ref(false)
@@ -32,7 +32,7 @@ watch(() => props.reminder, (reminder) => {
     form.eventDateTime = new Date(reminder.eventDateTime).toISOString().slice(0, 16)
     form.emailRecipients = reminder.emailRecipients?.join(', ') || ''
     form.hoursBeforeStart = reminder.hoursBeforeStart
-    form.emailIntervalHours = reminder.emailIntervalHours
+    form.emailIntervalMinutes = reminder.emailIntervalMinutes
   }
 }, { immediate: true })
 
@@ -43,17 +43,17 @@ watch(() => props.isOpen, (isOpen) => {
     form.eventDateTime = ''
     form.emailRecipients = ''
     form.hoursBeforeStart = 6
-    form.emailIntervalHours = 1
+    form.emailIntervalMinutes = 10
     error.value = ''
   }
 })
 
 const intervalOptions = [
-  { value: 1, label: '1 hour' },
-  { value: 2, label: '2 hours' },
-  { value: 4, label: '4 hours' },
-  { value: 6, label: '6 hours' },
-  { value: 12, label: '12 hours' }
+  { value: 5, label: '5 minutes' },
+  { value: 10, label: '10 minutes' },
+  { value: 15, label: '15 minutes' },
+  { value: 30, label: '30 minutes' },
+  { value: 60, label: '60 minutes' }
 ]
 
 async function handleSubmit() {
@@ -86,7 +86,7 @@ async function handleSubmit() {
       eventDateTime: eventDate.toISOString(),
       emailRecipients,
       hoursBeforeStart: form.hoursBeforeStart,
-      emailIntervalHours: form.emailIntervalHours
+      emailIntervalMinutes: form.emailIntervalMinutes
     }
 
     if (isEdit.value && props.reminder) {
@@ -170,11 +170,11 @@ async function handleSubmit() {
 
         <UFormGroup
           label="Email Interval"
-          name="emailIntervalHours"
+          name="emailIntervalMinutes"
           help="How often should we send reminders?"
         >
           <USelectMenu
-            v-model="form.emailIntervalHours"
+            v-model="form.emailIntervalMinutes"
             :options="intervalOptions"
             option-attribute="label"
             value-attribute="value"

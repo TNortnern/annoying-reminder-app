@@ -6,7 +6,7 @@ const updateReminderSchema = z.object({
   eventDateTime: z.string().datetime().optional(),
   emailRecipients: z.array(z.string().email()).min(1).optional(),
   hoursBeforeStart: z.number().int().min(0).optional(),
-  emailIntervalHours: z.number().int().min(1).optional(),
+  emailIntervalMinutes: z.number().int().min(1).optional(),
   status: z.enum(['pending', 'active', 'acknowledged']).optional()
 })
 
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     if (data.eventDateTime) updateData.eventDateTime = new Date(data.eventDateTime)
     if (data.emailRecipients) updateData.emailRecipients = data.emailRecipients
     if (data.hoursBeforeStart !== undefined) updateData.hoursBeforeStart = data.hoursBeforeStart
-    if (data.emailIntervalHours !== undefined) updateData.emailIntervalHours = data.emailIntervalHours
+    if (data.emailIntervalMinutes !== undefined) updateData.emailIntervalMinutes = data.emailIntervalMinutes
     if (data.status) updateData.status = data.status
 
     const reminder = await prisma.reminder.update({
