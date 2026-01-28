@@ -58,13 +58,23 @@ async function handleAcknowledge(id: string) {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold">🔔 Annoying Reminders</h1>
-          <UButton
-            color="gray"
-            variant="soft"
-            @click="handleLogout"
-          >
-            Logout
-          </UButton>
+          <div class="flex items-center gap-2">
+            <UButton
+              color="blue"
+              variant="soft"
+              icon="i-heroicons-envelope"
+              to="/test-email"
+            >
+              Test Email
+            </UButton>
+            <UButton
+              color="gray"
+              variant="soft"
+              @click="handleLogout"
+            >
+              Logout
+            </UButton>
+          </div>
         </div>
       </div>
     </header>
